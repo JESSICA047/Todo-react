@@ -2,37 +2,73 @@ import { useState } from "react";
 import Todo from "./components/Todo";
 import Form from "./components/form";
 import FilteredButton from "./components/FilteredButton";
+import { nanoid } from "nanoid";
 
 function App(props) {
-  const [tasks,setTasks] = useState(props.tasks);
+  const [tasks, setTasks] = useState(props.tasks);
+
+  function toggleTaskCompleted(id) {
+    const updatedTasks = tasks.map((task) => {
+      if (id === task.id) {
+        return { ...task, completed: !task.completed };
+      }
+      return task;
+    });
+    setTasks(updatedTasks);
+    // console.log(updatedTasks);
+  }
+
+  function deleteTask(id) {
+    const remainingTasks = tasks.filter((task) => id !== task.id);
+    setTasks(remainingTasks);
+  }
+
   function addTask(name) {
     const newTask = {
-      "id":name,
-      "completed":false
+      id: `todo-${nanoid()}`,
+      name,
+      completed: false,
     };
-    setTasks([...tasks,newTasks])
-    alert(name)
+    setTasks([...tasks, newTask]);
+    // alert(name);
   }
-  const taskList = props.tasks?.map((task) => (
+
+  function editTask(id, newName) {
+    const editTaskList = tasks.map((task) => {
+      if (id === task.id) {
+        return { ...task, name: newName };
+      }
+      return task
+    });
+    setTasks(editTaskList)
+  }
+
+  const taskList = tasks?.map((task) => (
     <Todo
       id={task.id}
       name={task.name}
       completed={task.completed}
       key={task.id}
+      toggleTaskCompleted={toggleTaskCompleted}
+      deleteTask={deleteTask}
+      editTask={editTask}
     />
   ));
+
+  const tasksNoun = taskList.length <= 1 ? "task" : "tasks";
+  const headingText = `${taskList.length}  ${tasksNoun} remaining`;
 
   return (
     <div className="todoapp stack-large">
       <h1>TodoMatic</h1>
-      <Form addTask={addTask}/>
+      <Form addTask={addTask} />
 
       <div className="filters btn-group stack-exception">
-        <FilteredButton/>
-        <FilteredButton/>
-        <FilteredButton/>
+        <FilteredButton />
+        <FilteredButton />
+        <FilteredButton />
       </div>
-      <h2 id="list-heading">3 tasks remaining</h2>
+      <h2 id="list-heading">{headingText}</h2>
       <ul
         role="list"
         className="todo-list stack-large stack-exception"
